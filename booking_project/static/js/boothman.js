@@ -112,21 +112,10 @@ const BoothManager = {
   },
 
   updateFloorPlan(boothType) {
-    const container = document.getElementById("floorPlanImageContainer");
-    if (!container) {
-      console.warn("Floor plan container not found");
-      return;
-    }
-    
-    const zoomContainer = document.getElementById("floorPlanZoomContainer");
-    if (!zoomContainer) {
-      console.warn("Zoom container not found");
-      return;
-    }
-
+    // Check if floor plan elements exist (they may be hidden in interactive view)
     const currentFloorPlan = document.getElementById("currentFloorPlan");
     if (!currentFloorPlan) {
-      console.warn("Current floor plan image not found");
+      console.log("Floor plan image not found - likely in interactive view");
       return;
     }
 
@@ -141,16 +130,19 @@ const BoothManager = {
       currentFloorPlan.alt = "Standard Floor Plan";
     }
   },
-
   renderBooths() {
     console.log("Rendering booths, total:", this.state.booths.size);
-    const $floorContainer = $(".floor-container");
-    if (!$floorContainer.length) {
+    
+    // Use native JavaScript instead of jQuery
+    const floorContainer = document.querySelector(".floor-container");
+    
+    if (!floorContainer) {
       console.error("Floor container not found");
       return;
     }
 
-    $floorContainer.empty();
+    // Clear container
+    floorContainer.innerHTML = '';
 
     // Group booths by row
     const boothsByRow = new Map();
@@ -165,23 +157,25 @@ const BoothManager = {
     console.log("Booths by row:", [...boothsByRow.entries()]);
 
     boothsByRow.forEach((booths, row) => {
-      const $rowDiv = $("<div>", {
-        class: "flex flex-wrap justify-center mb-4",
-      });
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'flex flex-wrap justify-center mb-4';
 
       booths.forEach((booth) => {
-        const $boothElement = this.createBoothElement(booth);
-        $rowDiv.append($boothElement);
+        const boothElement = this.createBoothElement(booth);
+        rowDiv.appendChild(boothElement);
       });
 
-      $floorContainer.append($rowDiv);
+      floorContainer.appendChild(rowDiv);
     });
+    
+    // Update checkout button state
+    const checkoutButton = document.getElementById('checkoutButton');
+    if (checkoutButton) {
+      checkoutButton.disabled = !this.state.selectedBooths.size;
+    }
   },
-
   // Create a single booth element
   createBoothElement(booth) {
-    $("#checkoutButton").prop("disabled", !this.state.selectedBooths.size);
-
     const boothStyles = {
       available: `
             bg-white dark:bg-gray-800
@@ -223,8 +217,8 @@ const BoothManager = {
         `,
     };
 
-    const $div = $("<div>", {
-      class: `
+    const div = document.createElement('div');
+    div.className = `
             booth 
             w-[120px] h-[120px] 
             m-[10px] 
@@ -239,13 +233,13 @@ const BoothManager = {
             text-center 
             backdrop-blur-[5px]
             ${boothStyles[booth.status]}
-        `,
-      "data-booth": booth.booth_number,
-      "data-price": booth.price,
-      "data-id": booth.id,
-    });
+        `;
+    
+    div.setAttribute('data-booth', booth.booth_number);
+    div.setAttribute('data-price', booth.price);
+    div.setAttribute('data-id', booth.id);
 
-    let boothContent = `
+    div.innerHTML = `
         <span class="absolute top-2 text-xs font-medium text-gray-500 dark:text-gray-400">
             ${this.formatBoothType(booth.booth_type)}
         </span>
@@ -261,10 +255,8 @@ const BoothManager = {
         </span>
     `;
 
-    $div.html(boothContent);
-    return $div;
+    return div;
   },
-
   // Format booth type with proper capitalization
   formatBoothType(type) {
     return type.replace(/\w\S*/g, function (txt) {
@@ -274,41 +266,41 @@ const BoothManager = {
 
   // Set up event listeners
   setupEventListeners() {
-    $(".floor-container").on("click", ".booth", (e) => {
-      const $boothElement = $(e.currentTarget);
-      const boothId = $boothElement.data("booth");
-      const boothData = this.state.booths.get(boothId);
+    // Use event delegation on the floor container
+    const floorContainer = document.querySelector(".floor-container");
+    
+    if (floorContainer) {
+      floorContainer.addEventListener("click", (e) => {
+        const boothElement = e.target.closest('.booth');
+        
+        if (!boothElement) return;
+        
+        const boothId = boothElement.getAttribute('data-booth');
+        const boothData = this.state.booths.get(boothId);
 
-      if (
-        boothData.status === "reserved" ||
-        boothData.status === "processing"
-      ) {
-        return;
-      }
+        if (!boothData || boothData.status === "reserved" || boothData.status === "processing") {
+          return;
+        }
 
-      if (this.state.selectedBooths.has(boothId)) {
-        this.state.selectedBooths.delete(boothId);
-        boothData.status = "available";
-      } else {
-        this.state.selectedBooths.add(boothId);
-        boothData.status = "selected";
-      }
+        if (this.state.selectedBooths.has(boothId)) {
+          this.state.selectedBooths.delete(boothId);
+          boothData.status = "available";
+        } else {
+          this.state.selectedBooths.add(boothId);
+          boothData.status = "selected";
+        }
 
-      this.renderBooths();
-      this.updateSelectedBoothsList();
-    });
+        this.renderBooths();
+        this.updateSelectedBoothsList();
+      });
+    }
 
-    // Add payment type change listener
+    // Payment type change listener (keep jQuery for form interactions)
     $(document).on("change", 'input[name="payment_type"]', function () {
       const isMobile = $(this).val() === "mobile";
       $("#mobileProviders").toggleClass("hidden", !isMobile);
-      console.log("Payment type changed:", {
-        isMobile,
-        methods: BoothManager.state.paymentMethods,
-      });
     });
   },
-
   // Show checkout modal
   showCheckoutModal() {
     const isMobile = window.innerWidth < 1024;

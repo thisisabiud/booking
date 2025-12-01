@@ -1,3 +1,4 @@
+<!-- new version  -->
 {% extends 'reservations/base.html' %}
 {% load static %}
 
@@ -309,75 +310,80 @@
 <script src="{% static 'js/boothman.js' %}"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
-    // Floor Plan Zoom and Pan functionality
-    const FloorPlan = {
-        scale: 1,
-        translateX: 0,
-        translateY: 0,
-        isDragging: false,
-        startX: 0,
-        startY: 0,
+    // Add this check at the beginning of FloorPlan.init() in your HTML template
+
+const FloorPlan = {
+    scale: 1,
+    translateX: 0,
+    translateY: 0,
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    
+    init() {
+        const container = document.getElementById('floorPlanImageContainer');
+        const zoomContainer = document.getElementById('floorPlanZoomContainer');
         
-        init() {
-            const container = document.getElementById('floorPlanImageContainer');
-            const zoomContainer = document.getElementById('floorPlanZoomContainer');
-            
-            if (!container || !zoomContainer) return;
-            
-            // Mouse events for dragging
-            container.addEventListener('mousedown', (e) => {
-                this.isDragging = true;
-                this.startX = e.clientX - this.translateX;
-                this.startY = e.clientY - this.translateY;
-                container.style.cursor = 'grabbing';
-            });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!this.isDragging) return;
-                this.translateX = e.clientX - this.startX;
-                this.translateY = e.clientY - this.startY;
-                this.updateTransform();
-            });
-            
-            document.addEventListener('mouseup', () => {
-                this.isDragging = false;
-                container.style.cursor = 'move';
-            });
-            
-            // Wheel zoom
-            container.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                this.scale *= delta;
-                this.scale = Math.min(Math.max(0.5, this.scale), 3);
-                this.updateTransform();
-            });
-        },
-        
-        updateTransform() {
-            const zoomContainer = document.getElementById('floorPlanZoomContainer');
-            if (zoomContainer) {
-                zoomContainer.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
-            }
-        },
-        
-        zoomIn() {
-            this.scale = Math.min(this.scale * 1.2, 3);
-            this.updateTransform();
-        },
-        
-        zoomOut() {
-            this.scale = Math.max(this.scale * 0.8, 0.5);
-            this.updateTransform();
-        },
-        
-        resetZoom() {
-            this.scale = 1;
-            this.translateX = 0;
-            this.translateY = 0;
-            this.updateTransform();
+        // Check if elements exist before proceeding
+        if (!container || !zoomContainer) {
+            console.log('Floor plan elements not found, skipping initialization');
+            return;
         }
-    };
+        
+        // Mouse events for dragging
+        container.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.startX = e.clientX - this.translateX;
+            this.startY = e.clientY - this.translateY;
+            container.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            this.translateX = e.clientX - this.startX;
+            this.translateY = e.clientY - this.startY;
+            this.updateTransform();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            this.isDragging = false;
+            if (container) container.style.cursor = 'move';
+        });
+        
+        // Wheel zoom
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            this.scale *= delta;
+            this.scale = Math.min(Math.max(0.5, this.scale), 3);
+            this.updateTransform();
+        });
+    },
+    
+    updateTransform() {
+        const zoomContainer = document.getElementById('floorPlanZoomContainer');
+        if (zoomContainer) {
+            zoomContainer.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+        }
+    },
+    
+    zoomIn() {
+        this.scale = Math.min(this.scale * 1.2, 3);
+        this.updateTransform();
+    },
+    
+    zoomOut() {
+        this.scale = Math.max(this.scale * 0.8, 0.5);
+        this.updateTransform();
+    },
+    
+    resetZoom() {
+        this.scale = 1;
+        this.translateX = 0;
+        this.translateY = 0;
+        this.updateTransform();
+    }
+};
 
     // Update floor plan image based on booth type
     function updateFloorPlanImage(type) {
