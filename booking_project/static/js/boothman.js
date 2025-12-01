@@ -112,28 +112,33 @@ const BoothManager = {
   },
 
   updateFloorPlan(boothType) {
-    const container = document.getElementById("floorPlanContainer");
-    const imageContainer =
-      container.querySelector("img") || container.querySelector(".flex");
+    const container = document.getElementById("floorPlanImageContainer");
+    if (!container) {
+      console.warn("Floor plan container not found");
+      return;
+    }
+    
+    const zoomContainer = document.getElementById("floorPlanZoomContainer");
+    if (!zoomContainer) {
+      console.warn("Zoom container not found");
+      return;
+    }
 
-    if (boothType === "premium" && container.dataset.premiumPlan) {
-      imageContainer.outerHTML = `
-            <img src="${container.dataset.premiumPlan}" 
-                 alt="Premium Floor Plan"
-                 class="w-full h-auto rounded-lg">
-        `;
-    } else if (boothType === "standard" && container.dataset.standardPlan) {
-      imageContainer.outerHTML = `
-            <img src="${container.dataset.standardPlan}" 
-                 alt="Standard Floor Plan"
-                 class="w-full h-auto rounded-lg">
-        `;
-    } else {
-      imageContainer.outerHTML = `
-            <div class="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p class="text-gray-500 dark:text-gray-400">No floor plan available for ${boothType} booths</p>
-            </div>
-        `;
+    const currentFloorPlan = document.getElementById("currentFloorPlan");
+    if (!currentFloorPlan) {
+      console.warn("Current floor plan image not found");
+      return;
+    }
+
+    const standardPlan = currentFloorPlan.dataset.standard;
+    const premiumPlan = currentFloorPlan.dataset.premium;
+
+    if (boothType === "premium" && premiumPlan) {
+      currentFloorPlan.src = premiumPlan;
+      currentFloorPlan.alt = "Premium Floor Plan";
+    } else if (boothType === "standard" && standardPlan) {
+      currentFloorPlan.src = standardPlan;
+      currentFloorPlan.alt = "Standard Floor Plan";
     }
   },
 
@@ -967,3 +972,4 @@ const BoothManager = {
     $("#exhibitorsContainer").append(newField);
   },
 };
+window.BoothManager = BoothManager;

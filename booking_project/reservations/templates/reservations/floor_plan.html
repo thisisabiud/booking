@@ -5,243 +5,248 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
     <!-- Sticky Header -->
     <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/20">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center space-x-6">
+        <div class="container mx-auto px-3 py-2.5">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div class="flex items-center space-x-3">
                     <a href="{% url 'reservations:events_list' %}" 
-                    class="group relative p-3 cursor-pointer
-                           bg-white/10 dark:bg-gray-800/10 
-                           hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-blue-500/10
-                           dark:hover:from-indigo-600/20 dark:hover:to-blue-600/20
-                           border border-gray-200/20 dark:border-gray-700/20
-                           rounded-xl backdrop-blur-sm
-                           transform transition-all duration-300 ease-out
-                           hover:scale-105 hover:shadow-lg hover:border-blue-500/30
-                           active:scale-95
-                           min-w-[44px] min-h-[44px]
-                           flex items-center justify-center
-                           z-20">
-                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 
-                                 group-hover:text-indigo-600 dark:group-hover:text-indigo-400
-                                 transition-colors duration-300
-                                 pointer-events-none" 
-                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" 
-                               d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                     </svg>
-                     <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 to-blue-500/20 
-                                 opacity-0 group-hover:opacity-100 blur transition-opacity duration-300
-                                 pointer-events-none"></div>
-                 </a>
-                    <h1 class="relative font-bold text-2xl sm:text-3xl">
-                        <span class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-blue-600/20 
-                                     blur-xl transform scale-150"></span>
-                        <span class="relative text-transparent bg-clip-text bg-gradient-to-r 
-                                     from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400
-                                     [text-shadow:0_4px_8px_rgba(104,117,245,0.2)]
-                                     hover:scale-[1.02] transition-transform duration-300 inline-block">
+                       class="group relative p-3 bg-white/10 dark:bg-gray-800/10 hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-blue-500/10 border border-gray-200/20 dark:border-gray-700/20 rounded-xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                    </a>
+                    <h1 class="relative font-bold text-lg sm:text-xl">
+                        <span class="relative text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400">
                             {{ event.title }}
                         </span>
                     </h1>
                 </div>
                 
-                <!-- Navigation Controls -->
-                <div class="flex items-center space-x-4">
-                        <!-- View Orders Button -->
-    
+                <div class="flex items-center space-x-2">
+                    <!-- View Mode Toggle -->
+                    <div class="inline-flex bg-gray-100/50 dark:bg-gray-800/50 rounded-xl p-1.5 backdrop-blur-sm" 
+                         x-data="{ viewMode: 'interactive' }">
+                        <button @click="viewMode = 'interactive'; document.getElementById('interactiveView').classList.remove('hidden'); document.getElementById('imageView').classList.add('hidden')"
+                                :class="{ 
+                                    'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg': viewMode === 'interactive',
+                                    'text-gray-600 dark:text-gray-300 hover:bg-white/50': viewMode !== 'interactive'
+                                }"
+                                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300">
+                            <i class="bi bi-grid-3x3-gap mr-1"></i> Interactive
+                        </button>
+                        <button @click="viewMode = 'image'; document.getElementById('interactiveView').classList.add('hidden'); document.getElementById('imageView').classList.remove('hidden')"
+                                :class="{ 
+                                    'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg': viewMode === 'image',
+                                    'text-gray-600 dark:text-gray-300 hover:bg-white/50': viewMode !== 'image'
+                                }"
+                                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300">
+                            <i class="bi bi-image mr-1"></i> Floor Plan
+                        </button>
+                    </div>
+
                     <!-- Booth Type Filter -->
-                    <!-- Get booth type from URL or default to 'all' -->
                     <div class="inline-flex bg-gray-100/50 dark:bg-gray-800/50 rounded-xl p-1.5 backdrop-blur-sm" 
                          x-data="{ 
-                            activeFilter: new URLSearchParams(window.location.search).get('booth_type') || 'all'
+                            activeFilter: new URLSearchParams(window.location.search).get('booth_type') || 'standard'
                          }">
-                       
                         <button @click="activeFilter = 'standard'" 
-                                onclick="BoothManager.fetchBooths('standard')"
+                                onclick="BoothManager.fetchBooths('standard'); updateFloorPlanImage('standard')"
                                 :class="{ 
                                     'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg scale-105': activeFilter === 'standard',
                                     'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50': activeFilter !== 'standard'
                                 }"
-                                class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 relative group">
-                            <span class="relative z-10">Standard</span>
-                            <div x-show="activeFilter === 'standard'" 
-                                 class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-lg blur"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 scale-90"
-                                 x-transition:enter-end="opacity-100 scale-100"></div>
+                                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300">
+                            Standard
                         </button>
-
                         <button @click="activeFilter = 'premium'" 
-                                onclick="BoothManager.fetchBooths('premium')"
+                                onclick="BoothManager.fetchBooths('premium'); updateFloorPlanImage('premium')"
                                 :class="{ 
                                     'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg scale-105': activeFilter === 'premium',
                                     'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50': activeFilter !== 'premium'
                                 }"
-                                class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 relative group">
-                            <span class="relative z-10">Premium</span>
-                            <div x-show="activeFilter === 'premium'" 
-                                 class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-lg blur"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 scale-90"
-                                 x-transition:enter-end="opacity-100 scale-100"></div>
+                                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300">
+                            Premium
                         </button>
                     </div>
                     
-                    <!-- Floor Plan Toggle -->
-                    <button id="toggleFloorPlanBtn" 
-                            class="inline-flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium
-                                   hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-all duration-200">
-                        <i class="bi bi-eye mr-2"></i> View Floor Plan
-                    </button>
                     <button id="openOrderListBtn" 
-                    class="group relative flex items-center gap-3 px-5 py-2.5
-                           bg-white/10 dark:bg-gray-800/10 
-                           hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-blue-500/10
-                           dark:hover:from-indigo-600/20 dark:hover:to-blue-600/20
-                           border border-gray-200/20 dark:border-gray-700/20
-                           rounded-xl backdrop-blur-sm
-                           transform transition-all duration-300 ease-out
-                           hover:scale-105 hover:shadow-lg hover:border-blue-500/30
-                           active:scale-95">
-                    <div class="relative">
-                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 
-                                    group-hover:text-indigo-600 dark:group-hover:text-indigo-400
-                                    transition-colors duration-300" 
-                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" 
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 text-[10px] text-white font-medium
-                                       items-center justify-center">{{ orders.count }}</span>
-                        </span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 
-                                 group-hover:text-indigo-600 dark:group-hover:text-indigo-400
-                                 transition-colors duration-300">Orders</span>
+                            class="group relative flex items-center gap-2 px-3 py-1.5 bg-white/10 dark:bg-gray-800/10 hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-blue-500/10 border border-gray-200/20 dark:border-gray-700/20 rounded-xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95">
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span class="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 text-[10px] text-white font-medium items-center justify-center">{{ orders.count }}</span>
+                            </span>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">Orders</span>
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-6">
-        <!-- Floor Plan Modal -->
-        <div id="floorPlanContainer" 
-             class="hidden fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 transition-all duration-300"
-             data-standard-plan="{{ event.floor_plan_standard.url }}"
-             data-premium-plan="{{ event.floor_plan_premium.url }}">
-            <div class="container mx-auto px-4 py-8 h-full flex items-center justify-center">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden transition-colors duration-300">
-                    <!-- Modal Header -->
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Floor Plan View</h3>
-                        <button onclick="document.getElementById('floorPlanContainer').classList.add('hidden')"
-                                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-
-                    <!-- Controls Toolbar -->
-                    <div class="px-6 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <button id="zoomIn" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-                                <i class="bi bi-zoom-in"></i>
-                            </button>
-                            <button id="zoomOut" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-                                <i class="bi bi-zoom-out"></i>
-                            </button>
-                            <button id="resetZoom" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-                                <i class="bi bi-arrows-angle-contract"></i>
+    <div class="container mx-auto px-3 py-3">
+        <div class="grid lg:grid-cols-12 gap-3">
+            <!-- Main Content Area -->
+            <div class="lg:col-span-8 order-last lg:order-first">
+                <!-- Interactive Booth View -->
+                <div id="interactiveView" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200/20">
+                    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-base font-bold text-white mb-0.5">Interactive Booth Selection</h2>
+                                <p class="text-indigo-100 text-xs">Click booths to select or deselect</p>
+                            </div>
+                            <button onclick="BoothManager.toggleView()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white text-xs font-medium transition-all duration-200">
+                                <i class="bi bi-arrows-fullscreen mr-1"></i> Fullscreen
                             </button>
                         </div>
-                        <button id="toggleFullscreen" class="ml-auto p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-                            <i class="bi bi-arrows-fullscreen"></i>
-                        </button>
                     </div>
-
-                    <!-- Image Container -->
-                    <div class="relative p-6">
-                        <div id="floorPlanImage" class="overflow-hidden rounded-lg cursor-move">
-                            <div id="floorPlanZoomContainer" class="transform-gpu transition-transform duration-200">
-                                <img src="{{ event.floor_plan_standard.url }}" 
-                                     alt="Floor Plan"
-                                     class="w-full h-auto rounded-lg transition-opacity duration-300"
-                                     loading="lazy">
+                    <div class="p-3">
+                        <div id="boothGridContainer" class="min-h-[350px] relative bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                            <div class="floor-container">
+                                <!-- Loading State -->
+                                <div class="flex flex-col items-center justify-center h-[300px]" id="boothLoadingState">
+                                    <div class="relative">
+                                        <div class="w-20 h-20 border-4 border-indigo-200 dark:border-indigo-800 rounded-full"></div>
+                                        <div class="w-20 h-20 border-4 border-indigo-600 dark:border-indigo-400 rounded-full animate-spin border-t-transparent absolute top-0 left-0"></div>
+                                    </div>
+                                    <p class="mt-3 text-gray-600 dark:text-gray-400 font-medium text-sm">Loading booths...</p>
+                                    <p class="mt-1 text-gray-500 dark:text-gray-500 text-xs">Please wait</p>
+                                </div>
+                                <!-- Interactive booths will be rendered here -->
+                                 
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Grid Container with Mobile Order -->
-        <div class="grid lg:grid-cols-12 gap-6">
-            <!-- Selected Booths Panel - Comes first on mobile -->
+                <!-- Floor Plan Image View (Hidden by default) -->
+                <div id="imageView" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200/20">
+                    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-base font-bold text-white mb-0.5">Floor Plan Overview</h2>
+                                <p class="text-indigo-100 text-xs">Zoom and pan to explore</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="FloorPlan.zoomIn()" class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all duration-200">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                                <button onclick="FloorPlan.zoomOut()" class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all duration-200">
+                                    <i class="bi bi-zoom-out"></i>
+                                </button>
+                                <button onclick="FloorPlan.resetZoom()" class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all duration-200">
+                                    <i class="bi bi-arrows-angle-contract"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900">
+                        <div id="floorPlanImageContainer" class="relative overflow-hidden rounded-lg cursor-move bg-white dark:bg-gray-800 shadow-inner" style="height: 350px;">
+                            <div id="floorPlanZoomContainer" class="transform-gpu transition-transform duration-200">
+                                <img id="currentFloorPlan" 
+                                     src="{{ event.floor_plan_standard.url }}" 
+                                     alt="Floor Plan"
+                                     class="w-full h-auto"
+                                     data-standard="{{ event.floor_plan_standard.url }}"
+                                     data-premium="{{ event.floor_plan_premium.url }}">
+                            </div>
+                        </div>
+                        <!-- Overlay clickable booth indicators on image -->
+                        <div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-info-circle text-blue-600 dark:text-blue-400 text-xl mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900 dark:text-blue-200 mb-0.5 text-sm">Floor Plan Reference</h4>
+                                    <p class="text-xs text-blue-700 dark:text-blue-300">Use to see layout. Switch to Interactive to select.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border mt-2 border-gray-200/20">
+                    <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Booth Status Legend</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div class="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border-2 border-blue-400/50 dark:border-blue-500/50 shadow-sm"></div>
+                            <span class="text-xs font-medium dark:text-gray-300">Available</span>
+                        </div>
+                        <div class="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 shadow-sm"></div>
+                            <span class="text-xs font-medium dark:text-gray-300">Reserved</span>
+                        </div>
+                        <div class="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 border-2 border-yellow-400 dark:border-yellow-500 shadow-sm"></div>
+                            <span class="text-xs font-medium dark:text-gray-300">Processing</span>
+                        </div>
+                        <div class="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div class="w-8 h-8 rounded-lg bg-blue-200 dark:bg-blue-600 border-2 border-blue-400 dark:border-blue-500 shadow-sm"></div>
+                            <span class="text-xs font-medium dark:text-gray-300">Selected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Booths Panel -->
             <div class="lg:col-span-4 order-first lg:order-last">
-                <div class="lg:sticky lg:top-24">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200/20">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Selected Booths</h2>
-                        <div id="selectedBoothsList" class="mb-6 min-h-[100px] space-y-2">
-                            <p class="text-gray-500 dark:text-gray-400 italic">No booths selected</p>
+                <div class="lg:sticky lg:top-20">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200/20">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white">Your Selection</h2>
+                            <span id="selectedCount" class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-xs font-semibold">0</span>
+                        </div>
+                        
+                        <div id="selectedBoothsList" class="mb-3 min-h-[150px] max-h-[300px] overflow-y-auto space-y-1.5">
+                            <div class="flex flex-col items-center justify-center h-[150px] text-center">
+                                <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                </svg>
+                                <p class="text-gray-500 dark:text-gray-400 font-medium mb-1 text-sm">No booths selected</p>
+                                <p class="text-gray-400 dark:text-gray-500 text-xs">Click booths to add</p>
+                            </div>
                         </div>
 
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                                <span class="font-semibold text-gray-900 dark:text-white">Total Price:</span>
-                                <span id="totalPrice" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-1.5 rounded-full font-medium">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg">
+                                <span class="font-semibold text-gray-900 dark:text-white text-sm">Total:</span>
+                                <span id="totalPrice" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
                                     TZS 0
                                 </span>
                             </div>
                             <button type="button" id="checkoutButton"
                                     onclick="BoothManager.showCheckoutModal()"
                                     disabled
-                                    class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-blue-600 
-                                           hover:from-indigo-700 hover:to-blue-700
-                                           text-white rounded-xl font-semibold shadow-lg
-                                           disabled:opacity-50 disabled:cursor-not-allowed
-                                           transition-all duration-300 transform hover:scale-[1.02]">
-                                Proceed to Checkout
+                                    class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm">
+                                <i class="bi bi-cart-check text-xl"></i>
+                                <span>Proceed to Checkout</span>
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Floor Plan - Comes second on mobile -->
-            <div class="lg:col-span-8 order-last lg:order-first">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200/20">
-                    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
-                        <h2 class="text-xl font-bold text-white">Exhibition Floor Map</h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="floor-container min-h-[500px] relative">
-                            <!-- Booths will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Legend -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border mt-4 border-gray-200/20">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Booth Status</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 rounded-lg border-2 border-blue-400/50 bg-white shadow-sm"></div>
-                            <span class="text-sm font-medium dark:text-gray-300">Available</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-600"></div>
-                            <span class="text-sm font-medium dark:text-gray-300">Reserved</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 rounded-lg bg-yellow-200 dark:bg-yellow-600"></div>
-                            <span class="text-sm font-medium dark:text-gray-300">Processing</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 rounded-lg bg-blue-200 dark:bg-blue-600"></div>
-                            <span class="text-sm font-medium dark:text-gray-300">Selected</span>
-                        </div>
+                    <!-- Quick Info Card -->
+                    <div class="mt-2 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-3 border border-indigo-200/50 dark:border-indigo-800/50">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
+                            <i class="bi bi-lightbulb text-indigo-600 dark:text-indigo-400"></i>
+                            Quick Tips
+                        </h3>
+                        <ul class="space-y-1.5 text-xs text-gray-700 dark:text-gray-300">
+                            <li class="flex items-start gap-1.5">
+                                <i class="bi bi-check-circle-fill text-indigo-600 dark:text-indigo-400 mt-0.5 text-xs"></i>
+                                <span>Switch views to see layout</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <i class="bi bi-check-circle-fill text-indigo-600 dark:text-indigo-400 mt-0.5 text-xs"></i>
+                                <span>Click booths to select</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <i class="bi bi-check-circle-fill text-indigo-600 dark:text-indigo-400 mt-0.5 text-xs"></i>
+                                <span>Premium has better features</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -251,15 +256,14 @@
 
 <!-- Order List Modal -->
 <div id="orderListModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeOrderListModal()"></div>
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm" onclick="closeOrderListModal()"></div>
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="relative w-full max-w-4xl p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-transform transform scale-95">
-            <div class="flex justify-between items-center mb-4">
-                <h2
-                class="text-4xl sm:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300">
-                Recent Orders
-            </h2>
-                <button onclick="closeOrderListModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+        <div class="relative w-full max-w-4xl p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transition-transform transform scale-95">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400">
+                    Recent Orders
+                </h2>
+                <button onclick="closeOrderListModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -274,15 +278,14 @@
 
 <!-- Receipt Modal -->
 <div id="receiptModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal()"></div>
+    <div class="fixed inset-0 bg-black opacity-50 backdrop-blur-sm" onclick="closeModal()"></div>
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="relative w-full max-w-4xl p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div class="relative w-full max-w-4xl p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Receipt</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Receipt</h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
@@ -291,12 +294,9 @@
             </div>
             <div class="mt-4 text-right">
                 <a id="downloadReceiptButton" href="#"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors duration-200">
+                   class="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="bi bi-download mr-2"></i>
                     Download Receipt
-                    <svg class="w-4 h-4 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7">
-                        </path>
-                    </svg>
                 </a>
             </div>
         </div>
@@ -308,27 +308,164 @@
 {{ block.super }}
 <script src="{% static 'js/boothman.js' %}"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script src="{% static 'js/floor_plan.js' %}"></script>
 <script>
+    // Floor Plan Zoom and Pan functionality
+    const FloorPlan = {
+        scale: 1,
+        translateX: 0,
+        translateY: 0,
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        
+        init() {
+            const container = document.getElementById('floorPlanImageContainer');
+            const zoomContainer = document.getElementById('floorPlanZoomContainer');
+            
+            if (!container || !zoomContainer) return;
+            
+            // Mouse events for dragging
+            container.addEventListener('mousedown', (e) => {
+                this.isDragging = true;
+                this.startX = e.clientX - this.translateX;
+                this.startY = e.clientY - this.translateY;
+                container.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!this.isDragging) return;
+                this.translateX = e.clientX - this.startX;
+                this.translateY = e.clientY - this.startY;
+                this.updateTransform();
+            });
+            
+            document.addEventListener('mouseup', () => {
+                this.isDragging = false;
+                container.style.cursor = 'move';
+            });
+            
+            // Wheel zoom
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                this.scale *= delta;
+                this.scale = Math.min(Math.max(0.5, this.scale), 3);
+                this.updateTransform();
+            });
+        },
+        
+        updateTransform() {
+            const zoomContainer = document.getElementById('floorPlanZoomContainer');
+            if (zoomContainer) {
+                zoomContainer.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+            }
+        },
+        
+        zoomIn() {
+            this.scale = Math.min(this.scale * 1.2, 3);
+            this.updateTransform();
+        },
+        
+        zoomOut() {
+            this.scale = Math.max(this.scale * 0.8, 0.5);
+            this.updateTransform();
+        },
+        
+        resetZoom() {
+            this.scale = 1;
+            this.translateX = 0;
+            this.translateY = 0;
+            this.updateTransform();
+        }
+    };
+
+    // Update floor plan image based on booth type
+    function updateFloorPlanImage(type) {
+        const img = document.getElementById('currentFloorPlan');
+        if (img) {
+            img.src = type === 'premium' ? img.dataset.premium : img.dataset.standard;
+        }
+    }
+
+    // Update selected count
+    function updateSelectedCount(count) {
+        const countEl = document.getElementById('selectedCount');
+        if (countEl) {
+            countEl.textContent = `${count} booth${count !== 1 ? 's' : ''}`;
+        }
+    }
+
+    // Hide loading state
+    function hideBoothLoadingState() {
+        const loadingState = document.getElementById('boothLoadingState');
+        if (loadingState) {
+            loadingState.remove();
+        }
+    }
+
+    // Override or extend BoothManager if needed
+    if (typeof BoothManager !== 'undefined') {
+        const originalRenderBooths = BoothManager.renderBooths;
+        BoothManager.renderBooths = function(booths) {
+            hideBoothLoadingState();
+            if (originalRenderBooths) {
+                originalRenderBooths.call(this, booths);
+            }
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        const params = new URLSearchParams(window.location.search);
-        const boothType = params.get('booth_type') || 'all';
-        BoothManager.init("{{ event.id }}", boothType);
+        // Wait a bit to ensure DOM is fully ready
+        setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            const boothType = params.get('booth_type') || 'standard';
+            
+            // Verify container exists before initializing
+            const container = document.querySelector('.floor-container');
+            if (container) {
+                console.log('Floor container found, initializing BoothManager...');
+                BoothManager.init("{{ event.id }}", boothType);
+            } else {
+                console.error('Floor container not found!');
+                showBoothLoadingError();
+            }
+            
+            // Initialize floor plan controls
+            FloorPlan.init();
+            
+            // Set initial floor plan image
+            updateFloorPlanImage(boothType);
 
-        // Set initial active state
-        Alpine.store('activeFilter', boothType);
-
-        // Floor Plan Toggle
-        document.getElementById('toggleFloorPlanBtn').addEventListener('click', function() {
-            const container = document.getElementById('floorPlanContainer');
-            container.classList.remove('hidden');
-        });
-
-        // Open Order List Modal
-        document.getElementById('openOrderListBtn').addEventListener('click', function() {
-            fetchOrderList();
-        });
+            // Open Order List Modal
+            const orderBtn = document.getElementById('openOrderListBtn');
+            if (orderBtn) {
+                orderBtn.addEventListener('click', function() {
+                    fetchOrderList();
+                });
+            }
+        }, 100);
     });
+
+    // Show error message if booths fail to load
+    function showBoothLoadingError() {
+        const container = document.querySelector('.floor-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                    <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Unable to Load Booths</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">There was an error loading the booth layout.</p>
+                    <button onclick="location.reload()" 
+                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200">
+                        Reload Page
+                    </button>
+                </div>
+            `;
+        }
+    }
 
     function fetchOrderList() {
         fetch('{% url "reservations:orders_list" %}')
@@ -344,80 +481,57 @@
         document.getElementById('orderListModal').classList.add('hidden');
         document.getElementById('orderListModal').classList.remove('scale-100');
     }
-</script>
 
-<script>
+    // Receipt Modal Functions
     viewReceipt = function(orderId) {
-    // Store current scroll position
-    const scrollPosition = window.pageYOffset;
-    const body = document.body;
-    
-    // Lock scrolling with padding to prevent layout shift
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    body.style.paddingRight = `${scrollbarWidth}px`;
-    body.style.overflow = 'hidden';
-    
-    // Fetch and display receipt content
-    fetch(`/order/${orderId}/receipt/`)
-        .then(response => response.text())
-        .then(html => {
-            const modal = document.getElementById('receiptModal');
-            const receiptContent = document.getElementById('receiptContent');
-            const downloadButton = document.getElementById('downloadReceiptButton');
-            const backdrop = document.querySelector('.modal-backdrop');
-            
-            // Show modal and backdrop
-            modal.classList.remove('hidden');
-            if (!backdrop) {
-                const newBackdrop = document.createElement('div');
-                newBackdrop.className = 'modal-backdrop fixed inset-0 bg-black bg-opacity-50 z-40';
-                document.body.appendChild(newBackdrop);
-            }
-            
-            receiptContent.innerHTML = html;
-            downloadButton.href = `/order/${orderId}/receipt/?download=true`;
+        const scrollPosition = window.pageYOffset;
+        const body = document.body;
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        body.style.paddingRight = `${scrollbarWidth}px`;
+        body.style.overflow = 'hidden';
+        
+        fetch(`/order/${orderId}/receipt/`)
+            .then(response => response.text())
+            .then(html => {
+                const modal = document.getElementById('receiptModal');
+                const receiptContent = document.getElementById('receiptContent');
+                const downloadButton = document.getElementById('downloadReceiptButton');
+                
+                modal.classList.remove('hidden');
+                receiptContent.innerHTML = html;
+                downloadButton.href = `/order/${orderId}/receipt/?download=true`;
+            });
+    };
+
+    window.closeModal = function() {
+        const modal = document.getElementById('receiptModal');
+        const body = document.body;
+        
+        modal.classList.add('hidden');
+        body.style.overflow = '';
+        body.style.paddingRight = '';
+        
+        window.scrollTo({
+            top: window.pageYOffset,
+            behavior: 'instant'
         });
-};
+    };
 
-window.closeModal = function() {
-    const modal = document.getElementById('receiptModal');
-    const backdrop = document.querySelector('.modal-backdrop');
-    const body = document.body;
-    
-    // Hide modal and backdrop
-    modal.classList.add('hidden');
-    if (backdrop) {
-        backdrop.remove();
-    }
-    
-    // Restore scrolling and layout
-    body.style.overflow = '';
-    body.style.paddingRight = '';
-    
-    // Restore scroll position smoothly
-    window.scrollTo({
-        top: window.pageYOffset,
-        behavior: 'instant'
+    // Modal event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('receiptModal');
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
     });
-};
-
-// Initialize event listeners when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('receiptModal');
-    
-    // Close on backdrop click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-    
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            closeModal();
-        }
-    });
-});
 </script>
 {% endblock %}
